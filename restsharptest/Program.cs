@@ -4,7 +4,7 @@ using RestSharp;
 
 namespace restsharptest
 {
-    class Program
+    internal class Program
     {
         /// <summary>
         /// Todo model of jsonplaceholder.api (should be in its own file)
@@ -16,7 +16,10 @@ namespace restsharptest
             public string Title { get; set; }
             public bool Completed { get; set; }
         }
-        static async Task Main(string[] args)
+
+        private static readonly RestClient client = new RestClient("https://jsonplaceholder.typicode.com/");
+
+        private static async Task Main(string[] args)
         {
             try
             {
@@ -29,12 +32,11 @@ namespace restsharptest
             catch (Exception e)
             {
                 Console.WriteLine($"{e.Message}\n{e.StackTrace}");
-            }          
+            }
         }
 
         private static async Task PrintTodoAsync()
         {
-            var client = new RestClient("https://jsonplaceholder.typicode.com/");
             var request = new RestRequest("todos/1");
             var todo = await client.GetAsync<Todo>(request);
             Console.WriteLine(todo.Title);
@@ -42,7 +44,6 @@ namespace restsharptest
 
         private static async Task PrintTodoandResponseAsync()
         {
-            var client = new RestClient("https://jsonplaceholder.typicode.com/");
             var request = new RestRequest("todos/1");
             var response = await client.ExecuteAsync<Todo>(request);
             var todo = response.Data;
@@ -51,7 +52,6 @@ namespace restsharptest
 
         private static void PrintJsonTodo()
         {
-            var client = new RestClient("https://jsonplaceholder.typicode.com/");
             var request = new RestRequest("todos/1");
             var response = client.Get(request);
             Console.WriteLine(response.Content);
@@ -60,7 +60,6 @@ namespace restsharptest
         private static async Task AddTodoAsync()
         {
             var todo = new Todo { Title = "add this todo" };
-            var client = new RestClient("https://jsonplaceholder.typicode.com/");
             var request = new RestRequest().AddJsonBody(todo);
             var response = await client.PostAsync<Todo>(request);
             Console.WriteLine(response.Title);
@@ -69,7 +68,6 @@ namespace restsharptest
         private static async Task AddTodoAsyncAndPrintResponse()
         {
             var todo = new Todo { Title = "add this todo" };
-            var client = new RestClient("https://jsonplaceholder.typicode.com/");
             var request = new RestRequest().AddJsonBody(todo);
             var response = await client.ExecutePostAsync<Todo>(request);
             Console.WriteLine(response.ResponseStatus);
