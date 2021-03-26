@@ -24,6 +24,7 @@ namespace restsharptest
                 await PrintTodoandResponseAsync();
                 PrintJsonTodo();
                 await AddTodoAsync();
+                await AddTodoAsyncAndPrintResponse();
             }
             catch (Exception e)
             {
@@ -63,6 +64,15 @@ namespace restsharptest
             var request = new RestRequest().AddJsonBody(todo);
             var response = await client.PostAsync<Todo>(request);
             Console.WriteLine(response.Title);
+        }
+
+        private static async Task AddTodoAsyncAndPrintResponse()
+        {
+            var todo = new Todo { Title = "add this todo" };
+            var client = new RestClient("https://jsonplaceholder.typicode.com/");
+            var request = new RestRequest().AddJsonBody(todo);
+            var response = await client.ExecutePostAsync<Todo>(request);
+            Console.WriteLine(response.ResponseStatus);
         }
     }
 }
