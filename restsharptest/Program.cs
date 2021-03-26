@@ -44,7 +44,8 @@ namespace restsharptest
 
         private static async Task PrintTodoandResponseAsync()
         {
-            var request = new RestRequest("todos/1");
+            var request = new RestRequest("todos/1"); 
+            //depreceated
             var response = await client.ExecuteAsync<Todo>(request);
             var todo = response.Data;
             Console.WriteLine(todo.Title);
@@ -61,6 +62,7 @@ namespace restsharptest
         {
             var todo = new Todo { Title = "add this todo" };
             var request = new RestRequest().AddJsonBody(todo);
+            //depreceated
             var response = await client.PostAsync<Todo>(request);
             Console.WriteLine(response.Title);
         }
@@ -68,7 +70,7 @@ namespace restsharptest
         private static async Task AddTodoAsyncAndPrintResponse()
         {
             var todo = new Todo { Title = "add this todo" };
-            var request = new RestRequest().AddJsonBody(todo);
+            var request = new RestRequest().AddJsonBody(todo); 
             var response = await client.ExecutePostAsync<Todo>(request);
             Console.WriteLine(response.ResponseStatus);
         }
