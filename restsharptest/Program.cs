@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RestSharp;
+using static System.Console;
 
 namespace restsharptest
 {
@@ -17,62 +18,52 @@ namespace restsharptest
             public bool Completed { get; set; }
         }
 
-        private static readonly RestClient client = new RestClient("https://jsonplaceholder.typicode.com/");
+        private static readonly RestClient _client = new RestClient("https://jsonplaceholder.typicode.com/");
 
         private static async Task Main(string[] args)
         {
             try
             {
-                await PrintTodoAsync();
-                await PrintTodoandResponseAsync();
+                await PrintTodoandResponseAsync();           
+                await AddTodoAndPrintResponseAsync();
                 PrintJsonTodo();
-                await AddTodoAsync();
-                await AddTodoAsyncAndPrintResponse();
             }
             catch (Exception e)
             {
-                Console.WriteLine($"{e.Message}\n{e.StackTrace}");
+                WriteLine($"{e.Message}\n{e.StackTrace}");
             }
-        }
-
-        private static async Task PrintTodoAsync()
-        {
-            var request = new RestRequest("todos/1");
-            var todo = await client.GetAsync<Todo>(request);
-            Console.WriteLine(todo.Title);
         }
 
         private static async Task PrintTodoandResponseAsync()
         {
-            var request = new RestRequest("todos/1"); 
-            //depreceated
-            var response = await client.ExecuteAsync<Todo>(request);
+            var request = new RestRequest("todos/1");
+            var response = await _client.ExecuteGetAsync<Todo>(request);
             var todo = response.Data;
-            Console.WriteLine(todo.Title);
+
+            WriteLine($"\n{nameof(PrintTodoandResponseAsync)}:\t{todo.Title}\t{response.StatusCode}");
+        }
+  
+        private static async Task AddTodoAndPrintResponseAsync()
+        {
+            var todo = new Todo { Title = "add this todo" };
+
+            //auto serializes the todo
+            var request = new RestRequest().AddJsonBody(todo);
+            var response = await _client.ExecutePostAsync<Todo>(request);
+
+            WriteLine($"\n{nameof(AddTodoAndPrintResponseAsync)}:\t{response.ResponseStatus}");
         }
 
         private static void PrintJsonTodo()
         {
             var request = new RestRequest("todos/1");
-            var response = client.Get(request);
-            Console.WriteLine(response.Content);
+            var response = _client.Get(request);
+
+            //auto deserializes the todo - correct way if we want to use the todo
+            // var response = _client.Get<Todo>(request);
+
+            WriteLine($"\n{nameof(PrintJsonTodo)}:\t{response.Content}");
         }
 
-        private static async Task AddTodoAsync()
-        {
-            var todo = new Todo { Title = "add this todo" };
-            var request = new RestRequest().AddJsonBody(todo);
-            //depreceated
-            var response = await client.PostAsync<Todo>(request);
-            Console.WriteLine(response.Title);
-        }
-
-        private static async Task AddTodoAsyncAndPrintResponse()
-        {
-            var todo = new Todo { Title = "add this todo" };
-            var request = new RestRequest().AddJsonBody(todo); 
-            var response = await client.ExecutePostAsync<Todo>(request);
-            Console.WriteLine(response.ResponseStatus);
-        }
     }
 }
