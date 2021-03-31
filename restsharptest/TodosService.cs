@@ -12,16 +12,19 @@ namespace restsharptest
 {
     public class TodosService : ITodosService
     {
-        private readonly SortedList<int, Todo> _todos = new SortedList<int, Todo>();
+        private SortedList<int, Todo> _todos = new SortedList<int, Todo>();
         private readonly RestClient _client;
 
         public TodosService(IOptions<ClientSettings> clientSettings)
         {
             _client = new RestClient(clientSettings.Value.TodosUrl);
         }
-        //TODO
-        //filtering, finished todos method props etc...
-        //setup di with appsettings json and put client url, get access to config here
+
+        public async Task<IEnumerable<Todo>> GetCompletedTodosAsync()
+        {
+            var todos = await GetTodosAsync();
+            return _todos.Values.Where(t => t.Completed == true);
+        }
 
         public async Task<Todo> GetTodoAsync(int id)
         {
@@ -40,7 +43,7 @@ namespace restsharptest
             var todo = response.Data;
 
             //add todos to memory list
-            _todos.Add(todo.Id,todo);
+            _todos.Add(todo.Id, todo);
             return todo;
             //  WriteLine($"\n{nameof(PrintTodoandResponseAsync)}:\t{todo.Title}\t{response.StatusCode}");
         }
@@ -58,9 +61,26 @@ namespace restsharptest
             // WriteLine($"\n{nameof(AddTodoAndPrintResponseAsync)}:\t{response.ResponseStatus}");
         }
 
-        public Task<IEnumerable<Todo>> GetTodosAsync()
+        public async Task<IEnumerable<Todo>> GetTodosAsync()
         {
-            throw new NotImplementedException();
+            if (_todos.Count > 0)
+            {
+                return _todos.Values;
+            }
+
+            var request = new RestRequest();
+            var response = await _client.ExecuteGetAsync<IEnumerable<Todo>>(request);
+            if (!response.IsSuccessful)
+            {
+                throw new ApiError(response.ErrorMessage);
+            }
+
+            foreach (var item in response.Data)
+            {
+                _todos.Add(item.Id, item);
+            }
+
+            return response.Data;
         }
 
         #region Not Async example

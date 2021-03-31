@@ -8,5 +8,6 @@ namespace restsharptest
         Task AddTodoAsync(Todo todo);
         Task<Todo> GetTodoAsync(int id);
         Task<IEnumerable<Todo>> GetTodosAsync();
+        Task<IEnumerable<Todo>> GetCompletedTodosAsync();
     }
 }

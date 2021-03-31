@@ -9,7 +9,7 @@ namespace restsharptest
 {
     public class TodosMenu
     {
-        private readonly int amountOfOptions = 2;
+        private readonly int amountOfOptions = 10;
         private readonly ITodosService _todosService;
 
         public TodosMenu(ITodosService todosService)
@@ -18,33 +18,65 @@ namespace restsharptest
         }
         public async Task Run()
         {
-            Write("Hello, what would you like to do today?:");
-            Write("1.Blabla\n2.Blabla");
-            int input = Helpers.GetIntInput(amountOfOptions, 0, $"You have {amountOfOptions} options, choose wisely");
-
-            //validate input make helper
-            try
+            while (true)
             {
-                switch (input)
+                WriteLine("Hello, what would you like to do today?:");
+                WriteLine("1.Get Todo\n2.Print all completed Todos\n10. Exit");
+                int input = Helpers.GetIntInput(amountOfOptions, 0, $"You have {amountOfOptions} options, choose wisely:");
+                try
                 {
-                    case 1:
-                        var todo = await _todosService.GetTodoAsync(1);
-                        WriteLine(todo.ToString());
-                        break;
-                    default:
-                        break;
+                    switch (input)
+                    {
+                        case 1:
+                            var todo = await GetTodoAsync();
+                            WriteLine(todo.ToString());
+                            break;
+                        case 2:
+                            await PrintAllCompletedTodos();
+                            break;
+                        case 10:
+                            return;
+                        default:
+                            break;
+                    }
                 }
+                catch (Exception e)
+                {
+                    WriteLine($"{e.Message}\n{e.StackTrace}");
+                }
+                Write("Press any key to continue...");
+                ReadKey();
+                Clear();
+            }
+        }
 
-                /*
-                await PrintTodoandResponseAsync();
-                await AddTodoAndPrintResponseAsync();
-                PrintJsonTodo();
-                */
-            }
-            catch (Exception e)
+        private async Task PrintAllCompletedTodos()
+        {
+            var todos = await _todosService.GetCompletedTodosAsync();
+            Helpers.PrintItems(todos);
+        }
+
+        private async Task<Todo> GetTodoAsync()
+        {
+            Write("Which todo would you like to fetch?: ");
+            var todos = await _todosService.GetTodosAsync();
+            Helpers.PrintItems(todos);
+
+            while (true)
             {
-                WriteLine($"{e.Message}\n{e.StackTrace}");
+                var todoId = Helpers.GetIntInput();
+                if (todos.Any(t => t.Id == todoId))
+                {
+                    return todos.SingleOrDefault(t => t.Id == todoId);
+                }
             }
+        }
+
+        private async Task TodoMenu(Todo todo)
+        {
+            //move to its own class
+            //would you like to edit this todo? if so then what?
+            //delete, edit
         }
     }
 }

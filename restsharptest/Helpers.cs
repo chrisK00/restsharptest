@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace restsharptest
 {
@@ -9,7 +10,7 @@ namespace restsharptest
         {
             while (true)
             {
-                Console.WriteLine(message != null ? message : "Only enter a whole number");
+                Console.Write(message != null ? message : "Only enter a whole number:");
                 if (int.TryParse(Console.ReadLine(), out int input))
                 {
                     if (input >= minValue && input <= maxValue)
@@ -17,6 +18,14 @@ namespace restsharptest
                         return input;
                     }
                 }
+            }
+        }
+
+        public static void PrintItems<T>(IEnumerable<T> items)
+        {
+            foreach (var item in items)
+            {
+                Console.WriteLine(item.ToString());
             }
         }
     }
