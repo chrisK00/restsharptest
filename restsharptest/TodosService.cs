@@ -12,7 +12,7 @@ namespace restsharptest
 {
     public class TodosService : ITodosService
     {
-
+        private readonly SortedList<int, Todo> _todos = new SortedList<int, Todo>();
         private readonly RestClient _client;
 
         public TodosService(IOptions<ClientSettings> clientSettings)
@@ -20,37 +20,48 @@ namespace restsharptest
             _client = new RestClient(clientSettings.Value.TodosUrl);
         }
         //TODO
-        //logic for saving todos in list instead of having to get all the time?
         //filtering, finished todos method props etc...
-        //rename method names
         //setup di with appsettings json and put client url, get access to config here
-        //get all todos and save inside readonly field then do logic if already have .count and gettodoasync makes use of it
 
         public async Task<Todo> GetTodoAsync(int id)
         {
-            var request = new RestRequest("todos/1");
-            var response = await _client.ExecuteGetAsync<Todo>(request);
-            var todo = response.Data;
-            return todo;
+            if (_todos.ContainsKey(id))
+            {
+                return _todos[id];
+            }
 
-          //  WriteLine($"\n{nameof(PrintTodoandResponseAsync)}:\t{todo.Title}\t{response.StatusCode}");
+            var request = new RestRequest($"{id}");
+            var response = await _client.ExecuteGetAsync<Todo>(request);
+
+            if (!response.IsSuccessful)
+            {
+                throw new ApiError(response.ErrorMessage);
+            }
+            var todo = response.Data;
+
+            //add todos to memory list
+            _todos.Add(todo.Id,todo);
+            return todo;
+            //  WriteLine($"\n{nameof(PrintTodoandResponseAsync)}:\t{todo.Title}\t{response.StatusCode}");
         }
 
         public async Task AddTodoAsync(Todo todo)
         {
-
             //auto serializes the todo
             var request = new RestRequest().AddJsonBody(todo);
             var response = await _client.ExecutePostAsync<Todo>(request);
-
-           // WriteLine($"\n{nameof(AddTodoAndPrintResponseAsync)}:\t{response.ResponseStatus}");
+            if (!response.IsSuccessful)
+            {
+                throw new ApiError(response.ErrorMessage);
+            }
+            _todos.Add(todo.Id, todo);
+            // WriteLine($"\n{nameof(AddTodoAndPrintResponseAsync)}:\t{response.ResponseStatus}");
         }
 
         public Task<IEnumerable<Todo>> GetTodosAsync()
         {
             throw new NotImplementedException();
         }
-
 
         #region Not Async example
         /*
@@ -65,6 +76,5 @@ namespace restsharptest
             WriteLine($"\n{nameof(PrintJsonTodo)}:\t{response.Content}");
         }*/
         #endregion
-
     }
 }
