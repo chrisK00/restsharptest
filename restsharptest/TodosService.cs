@@ -42,8 +42,12 @@ namespace restsharptest
             }
             var todo = response.Data;
 
-            //add todos to memory list
-            _todos.Add(todo.Id, todo);
+            lock (_todos)
+            {
+                //add todos to memory list
+                _todos.Add(todo.Id, todo);
+            }
+                 
             return todo;
             //  WriteLine($"\n{nameof(PrintTodoandResponseAsync)}:\t{todo.Title}\t{response.StatusCode}");
         }
@@ -57,7 +61,11 @@ namespace restsharptest
             {
                 throw new ApiError(response.ErrorMessage);
             }
-            _todos.Add(todo.Id, todo);
+
+            lock (_todos)
+            {
+                _todos.Add(todo.Id, todo);
+            }
             // WriteLine($"\n{nameof(AddTodoAndPrintResponseAsync)}:\t{response.ResponseStatus}");
         }
 
@@ -77,7 +85,10 @@ namespace restsharptest
 
             foreach (var item in response.Data)
             {
-                _todos.Add(item.Id, item);
+                lock (_todos)
+                {
+                    _todos.Add(item.Id, item);
+                }
             }
 
             return response.Data;

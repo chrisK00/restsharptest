@@ -29,7 +29,7 @@ namespace restsharptest
                     {
                         case 1:
                             var todo = await GetTodoAsync();
-                            WriteLine(todo.ToString());
+                            WriteLine($"\n{todo}");
                             break;
                         case 2:
                             await PrintAllCompletedTodos();
@@ -67,16 +67,9 @@ namespace restsharptest
                 var todoId = Helpers.GetIntInput();
                 if (todos.Any(t => t.Id == todoId))
                 {
-                    return todos.SingleOrDefault(t => t.Id == todoId);
+                    return todos.FirstOrDefault(t => t.Id == todoId);
                 }
             }
-        }
-
-        private async Task TodoMenu(Todo todo)
-        {
-            //move to its own class
-            //would you like to edit this todo? if so then what?
-            //delete, edit
         }
     }
 }
