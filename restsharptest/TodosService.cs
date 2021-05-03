@@ -23,14 +23,20 @@ namespace restsharptest
         public async Task<IEnumerable<Todo>> GetCompletedTodosAsync()
         {
             var todos = await GetTodosAsync();
-            return _todos.Values.Where(t => t.Completed == true);
+            lock (_todos)
+            {
+                return _todos.Values.Where(t => t.Completed == true);
+            }
         }
 
         public async Task<Todo> GetTodoAsync(int id)
         {
-            if (_todos.ContainsKey(id))
+            lock (_todos)
             {
-                return _todos[id];
+                if (_todos.ContainsKey(id))
+                {
+                    return _todos[id];
+                }
             }
 
             var request = new RestRequest($"{id}");
@@ -71,10 +77,13 @@ namespace restsharptest
 
         public async Task<IEnumerable<Todo>> GetTodosAsync()
         {
-            if (_todos.Count > 0)
+            lock (_todos)
             {
-                return _todos.Values;
-            }
+                if (_todos.Count > 0)
+                {
+                    return _todos.Values;
+                }
+            }           
 
             var request = new RestRequest();
             var response = await _client.ExecuteGetAsync<IEnumerable<Todo>>(request);
